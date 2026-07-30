@@ -14,7 +14,7 @@
     "vite": "^8.1.5"
   },
   "growiPlugin": {
-    "schemaVersion": "1.0.0",
+    "schemaVersion": "1",
     "types": [
       "script"
     ],
