@@ -2,7 +2,7 @@
   "name": "growi-plugin-visual-editor",
   "version": "1.0.0",
   "description": "Visual editor plugin for GROWI",
-  "main": "index.umd.js",
+  "main": "dist/index.umd.js",
   "scripts": {
     "build": "vite build"
   },
@@ -14,12 +14,10 @@
     "vite": "^8.1.5"
   },
   "growiPlugin": {
-    "schemaVersion": "1",
+    "schemaVersion": "1.0.0",
     "types": [
       "script"
     ],
-    "scripts": [
-      "dist/index.umd.js"
-    ]
+    "scriptPath": "dist/index.umd.js"
   }
 }
