@@ -14,12 +14,10 @@
     "vite": "^8.1.5"
   },
   "growiPlugin": {
-    "schemaVersion": "2",
-    "meta": {
-      "name": "growi-plugin-visual-editor",
-      "types": [
-        "script"
-      ],
-      "scriptPath": "dist/index.umd.js"
-    }
+    "schemaVersion": "1",
+    "types": [
+      "script"
+    ],
+    "scriptPath": "dist/index.umd.js"
   }
+}
