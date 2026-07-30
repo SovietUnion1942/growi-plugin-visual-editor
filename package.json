@@ -18,6 +18,8 @@
     "types": [
       "script"
     ],
-    "scriptPath": "dist/index.umd.js"
+    "scripts": [
+      "dist/index.umd.js"
+    ]
   }
 }
