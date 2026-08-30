@@ -6,7 +6,7 @@ export default defineConfig({
     manifest: true,
     sourcemap: true,
     rollupOptions: {
-      input: ['/client-entry.ts'],
+      input: ['/client-entry.tsx'],
     },
   },
 });

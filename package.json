@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "Visual (WYSIWYG) editor plugin for GROWI - technical verification spike",
   "type": "module",
+  "keywords": ["growi", "growi-plugin"],
   "scripts": {
     "dev": "vite --host",
     "build": "tsc && vite build",

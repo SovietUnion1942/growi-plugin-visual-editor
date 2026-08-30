@@ -10,7 +10,8 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
+    "jsx": "react-jsx",
     "strict": true
   },
-  "include": ["client-entry.ts", "src"]
+  "include": ["client-entry.tsx", "src"]
 }

@@ -1,28 +1,10 @@
 /** 検証用フローティングパネル（素の DOM、React 非依存） */
 
+import './panel.css';
 import { checkCmAccess, currentMarkdown, roundTripTest, writeBackTest } from './spike';
-
-const STYLE = `
-.ve-spike { position: fixed; right: 12px; bottom: 12px; z-index: 100000;
-  width: 420px; max-height: 70vh; display: flex; flex-direction: column;
-  font: 12px/1.5 ui-monospace, monospace; background: #1e1e1e; color: #ddd;
-  border: 1px solid #555; border-radius: 6px; box-shadow: 0 4px 20px rgba(0,0,0,.4); }
-.ve-spike h4 { margin: 0; padding: 8px 10px; background: #333; font-size: 12px;
-  display: flex; justify-content: space-between; align-items: center; }
-.ve-spike .ve-btns { padding: 8px 10px; display: flex; gap: 6px; flex-wrap: wrap; border-bottom: 1px solid #444; }
-.ve-spike button { font: inherit; padding: 4px 8px; background: #2f6f4f; color: #fff;
-  border: 0; border-radius: 4px; cursor: pointer; }
-.ve-spike button.ghost { background: #444; }
-.ve-spike .ve-log { padding: 8px 10px; overflow: auto; white-space: pre-wrap; word-break: break-all; }
-.ve-spike .ok { color: #6fdd8b; } .ve-spike .warn { color: #e6c07b; } .ve-spike .ng { color: #ff7b72; }
-`;
 
 export function mountPanel(): void {
   if (document.querySelector('.ve-spike')) return;
-
-  const style = document.createElement('style');
-  style.textContent = STYLE;
-  document.head.appendChild(style);
 
   const root = document.createElement('div');
   root.className = 've-spike';
@@ -51,7 +33,7 @@ export function mountPanel(): void {
   root.addEventListener('click', (e) => {
     const act = (e.target as HTMLElement).dataset.act;
     if (!act) return;
-    if (act === 'close') { root.remove(); style.remove(); return; }
+    if (act === 'close') { root.remove(); return; }
     if (act === 'clear') { log.innerHTML = ''; return; }
 
     put(`--- ${new Date().toLocaleTimeString()} : ${act} ---`, 'warn');
