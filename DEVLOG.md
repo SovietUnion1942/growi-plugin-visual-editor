@@ -66,6 +66,49 @@ manifest に `css` を載せる。
 - `:::` ブロック・未知 HTML = atomic なソース保持ノード
 - 同期は full-doc replace で MVP。将来は差分置換して CM の undo 履歴を保つ
 
+## v0.1 実装 (2026-08-30)
+
+散文だけ WYSIWYG、GROWI 独自記法は不透明ブロック、という方針で実装。
+
+### 構成
+
+```
+client-entry.tsx        styles 読込 + activator 登録 + initToggle()
+src/toggle.ts           編集画面に「ビジュアル/ソース」切替ボタン。
+                        ビジュアル中は .cm-editor を display:none にして
+                        隣に WYSIWYG を挿入。CM6 を常に正とし全文置換で書き戻す
+src/cmBridge.ts         CM6 EditorView 探索 / 読み書き
+src/markdown/
+  schema.ts             schema-basic + list + s マーク + code_block params
+                        + list_item.checked + source_block(不透明ノード)
+  sourceBlockRules.ts   markdown-it: :::／:: ディレクティブ・パイプテーブルを
+                        ve_source トークンとして丸ごと確保
+  taskListRule.ts       markdown-it core: - [ ] / - [x] を list_item.checked に
+  parser.ts             MarkdownParser (veSchema 用トークンマップ)
+  serializer.ts         MarkdownSerializer。箇条書きは "-"、タスクは "- [x] "、
+                        source_block は生ソースをそのまま書き戻し
+src/editor/
+  visualEditor.ts       EditorState/View 組み立て、debounce 400ms で onChange
+  toolbar.ts            H1-3/P, B/I/S/code, リスト, タスク, 引用, コード, リンク
+  keymap.ts             Mod-b 等 + リスト操作 + baseKeymap
+  inputRules.ts         "# " "- " "> " "1. " "``` " など
+  sourceBlockView.ts    不透明ブロックのカード UI(「ソース編集」で textarea)
+```
+
+### 往復テスト結果 (src/_selftest.ts, esbuild でバンドルして node 実行)
+
+directive / table / html / tasklist は **byte 安定**。
+prose のみ差分 1 件: `> 行1\n> 行2` が `> 行1 行2` に結合される
+(Markdown のソフトラップ正規化。レンダリング結果は同一)。許容。
+
+### 既知の制約
+
+- テーブルは source_block 編集のみ(リッチ表編集は将来)
+- ソフトラップは 1 行に結合される
+- ビジュアル→CM は全文置換なので CM の undo 履歴が 1 ステップに潰れる
+- 協調編集(Yjs)モードは未検証
+- ビジュアル中の CM 外部変更は取り込まない(入場時スナップショット)
+
 ## GROWI はプラグインをビルドしない
 
 サーバ側は git clone した中の `dist/` と `dist/.vite/manifest.json` を

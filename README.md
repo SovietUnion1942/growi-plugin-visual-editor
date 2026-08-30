@@ -1,38 +1,30 @@
 # growi-plugin-visual-editor
 
-GROWI にビジュアル(WYSIWYG)エディタを載せられるか検証するための **技術検証スパイク**。
-まだビジュアルエディタ本体は入っていない。
+GROWI の編集画面に **ビジュアル(WYSIWYG)編集** を追加する script プラグイン。
 
-## なぜスパイクから始めるか
+編集画面の左下に出る「✏️ ビジュアル編集」ボタンで、CodeMirror の Markdown 編集と
+ProseMirror ベースのビジュアル編集を行き来できる。Markdown 本文(CodeMirror)を
+常に正とし、ビジュアル側の変更は全文置換で書き戻すので、GROWI の保存・プレビュー・
+自動保存はそのまま動く。
 
-GROWI の script プラグインが触れるのは `window.growiFacade`(`markdownRenderer` と `react` のみ)
-と `window.pluginActivators` だけ。エディタを差し替える公式フックは無い。
-そのため「編集画面の CodeMirror6 に DOM 経由で割り込み、Markdown を相互変換して同期する」
-方式しか取れず、その方式が実機で成立するかを先に確かめる。
+## 方針
 
-## 検証したい 3 点
+- WYSIWYG で扱うのは素の散文: 見出し / 太字・斜体・打ち消し・コード / リンク /
+  箇条書き・番号リスト・GFM タスクリスト / 引用 / コードブロック / 画像 / 水平線
+- GROWI 独自の `:::` `::` ディレクティブ、パイプテーブル、ブロック HTML は
+  **リッチ変換せず**「ソースそのまま」の不透明ブロックとして表示し、
+  カードの「ソース編集」で直接編集する(= 壊さない)
 
-| # | 確認内容 | 崩れたら |
-|---|---|---|
-| 1 | 編集画面の CM6 `EditorView` に DOM 経由で到達できる（`.cm-content` の expando 経由） | 別の同期手段(input イベント模倣等)を検討 |
-| 2 | Markdown → ProseMirror doc → Markdown の往復で本文が壊れない | ビジュアル対応記法を絞る / 独自記法はロック |
-| 3 | CM6 へ書き戻した変更を GROWI(プレビュー・自動保存)が拾う | dispatch 以外の反映経路が必要 |
-
-## 使い方
+## ビルド
 
 ```bash
 pnpm install
-pnpm build   # dist/ に出力
+pnpm build   # dist/ に出力(コミット対象)
 ```
 
-`dist/` を GROWI の管理画面からプラグイン登録 → 編集画面を開くと右下に検証パネルが出る。
-「1. CM6検出」「2. Markdown往復」「3. 書き戻し」を順に押し、結果を DEVLOG に記録する。
-書き戻しテストは無害な HTML コメント行を追記するだけで、もう一度押せば取り消せる。
+GROWI 側は GitHub リポジトリの `dist/` をそのまま配信する。変更したら
+コミット & push → 管理画面 → プラグイン → 「更新」。
 
-## 構成
+## 構成 / 経緯
 
-```
-client-entry.ts   activator 登録 + 編集画面検出でパネルをマウント
-src/panel.ts      検証用フローティングパネル(素の DOM、React 非依存)
-src/spike.ts      3 点の検証ロジック本体
-```
+[DEVLOG.md](./DEVLOG.md) 参照。往復テストは `src/_selftest.ts`。
