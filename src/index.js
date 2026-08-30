@@ -1,1 +1,0 @@
-console.log('Visual Editor Plugin is active!');
