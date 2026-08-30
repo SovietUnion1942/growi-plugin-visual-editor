@@ -32,8 +32,13 @@ function enterVisual(): void {
 
   const markdown = readMarkdown(cmView);
 
+  // 隠す前に見えているエディタの寸法を測り、同じ高さを引き継ぐ
+  const rect = cmEditorEl.getBoundingClientRect();
+  const h = Math.max(rect.height, Math.round(window.innerHeight * 0.6));
+
   container = document.createElement('div');
   container.className = 've-container';
+  container.style.height = `${h}px`;
   cmEditorEl.parentElement?.insertBefore(container, cmEditorEl.nextSibling);
   cmEditorEl.style.display = 'none';
 
@@ -41,9 +46,13 @@ function enterVisual(): void {
     if (cmView != null) writeMarkdown(cmView, md);
   });
   handle.focus();
+  container.scrollIntoView({ block: 'nearest' });
 
   mode = 'visual';
   setLabel();
+  // eslint-disable-next-line no-console
+  console.log('[growi-plugin-visual-editor] visual mode',
+    { h, containerRect: container.getBoundingClientRect(), cmHidden: cmEditorEl.style.display });
 }
 
 function exitVisual(sync = true): void {
