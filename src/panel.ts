@@ -1,7 +1,7 @@
 /** 検証用フローティングパネル（素の DOM、React 非依存） */
 
 import './panel.css';
-import { checkCmAccess, currentMarkdown, roundTripTest, writeBackTest } from './spike';
+import { checkCmAccess, currentMarkdown, diagnose, roundTripTest, writeBackTest } from './spike';
 
 export function mountPanel(): void {
   if (document.querySelector('.ve-spike')) return;
@@ -14,6 +14,7 @@ export function mountPanel(): void {
       <button data-act="cm">1. CM6検出</button>
       <button data-act="rt">2. Markdown往復</button>
       <button data-act="wb">3. 書き戻し</button>
+      <button class="ghost" data-act="diag">diag</button>
       <button class="ghost" data-act="clear">clear</button>
     </div>
     <div class="ve-log"></div>`;
@@ -41,6 +42,9 @@ export function mountPanel(): void {
     if (act === 'cm') {
       const r = checkCmAccess();
       put(r.text, r.result);
+    }
+    if (act === 'diag') {
+      for (const line of diagnose()) put(line.text, line.result);
     }
     if (act === 'rt') {
       const md = currentMarkdown();

@@ -21,20 +21,68 @@ type CmView = {
 
 type Line = { text: string; result: 'ok' | 'warn' | 'ng' };
 
-/** .cm-content にライブラリが張り付ける expando を辿って EditorView を得る */
+/** DOM 要素から CodeMirror6 の内部オブジェクト(Tile / ContentView)を得る */
+function getCmInternal(el: Element | null): any {
+  if (el == null) return null;
+  const anyEl = el as any;
+  // CM 6.40+ は cmTile、それ以前は cmView
+  return anyEl.cmTile ?? anyEl.cmView ?? null;
+}
+
+/** 内部オブジェクトから EditorView 本体を掘り出す */
+function resolveView(internal: any): any {
+  if (internal == null) return null;
+  const candidates = [
+    internal.root?.view, // Tile: root(DocTile).view
+    internal.rootView?.view, // 旧 ContentView.rootView.view
+    internal.view, // DocView.view
+    internal.editorView,
+  ];
+  for (const v of candidates) {
+    if (v && typeof v.dispatch === 'function' && v.state?.doc) return v;
+  }
+  return null;
+}
+
+/** .cm-editor / .cm-content の expando を辿って EditorView を得る */
 export function findCmView(): CmView | null {
   const roots = Array.from(document.querySelectorAll<HTMLElement>('.cm-editor'));
   for (const root of roots) {
-    // 非表示(ビジュアルモード時に隠したもの等)はスキップ
+    // 非表示はスキップ
     if (root.offsetParent === null && root.getClientRects().length === 0) continue;
-    const content = root.querySelector('.cm-content') as (HTMLElement & { cmView?: any }) | null;
-    const cmView = content?.cmView;
-    const view = cmView?.rootView?.view ?? cmView?.view;
-    if (view && typeof view.dispatch === 'function' && view.state?.doc) {
-      return view as CmView;
-    }
+    const content = root.querySelector('.cm-content');
+    const view =
+      resolveView(getCmInternal(content)) ?? resolveView(getCmInternal(root));
+    if (view) return view as CmView;
   }
   return null;
+}
+
+/** 検出できなかったとき用の DOM ダンプ */
+export function diagnose(): Line[] {
+  const out: Line[] = [];
+  const editors = document.querySelectorAll('.cm-editor');
+  out.push({ text: `.cm-editor: ${editors.length} 個`, result: editors.length ? 'ok' : 'ng' });
+  editors.forEach((ed, i) => {
+    const content = ed.querySelector('.cm-content');
+    const expandos = content
+      ? Object.getOwnPropertyNames(content).filter((k) => k.startsWith('cm'))
+      : [];
+    out.push({
+      text: `  [${i}] visible=${(ed as HTMLElement).offsetParent != null} .cm-content=${!!content} expando(cm*)=[${expandos.join(',')}]`,
+      result: 'warn',
+    });
+    const internal = getCmInternal(content);
+    if (internal) {
+      out.push({
+        text: `      internal keys: ${Object.keys(internal).slice(0, 12).join(',')}`,
+        result: 'warn',
+      });
+    }
+  });
+  const withMd = document.querySelectorAll('.CodeMirror, [class*="cm-"]').length;
+  out.push({ text: `cm-* を含む要素: ${withMd}`, result: 'warn' });
+  return out;
 }
 
 export function checkCmAccess(): Line {
